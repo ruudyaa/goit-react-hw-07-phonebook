@@ -1,5 +1,3 @@
-import { useSelector } from 'react-redux';
-// toastify
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -12,28 +10,19 @@ import { Filter } from './Filter/Filter';
 import { ContactForm } from './ContactForm/ContactForm';
 import { ContactList } from './ContactList/ContactList';
 
-// redux
-import { getContacts } from 'redux/selectors';
-
-const App = () => {
-  const contacts = useSelector(getContacts);
-
+export const App = () => {
   return (
-    <Layout>
-      <Section title="PhoneBook">
-        <ContactForm />
-        {contacts.length > 0 && (
-          <>
-            <Title title="Contacts" />
-            <Filter />
-            <ContactList />
-          </>
-        )}
-      </Section>
-      <ToastContainer />
+    <>
+      <Layout>
+        <Section title="PhoneBook">
+          <ContactForm />
+          <Title title="Contacts" />
+          <Filter />
+          <ContactList />
+        </Section>
+        <ToastContainer />
+      </Layout>
       <GlobalStyle />
-    </Layout>
+    </>
   );
 };
-
-export default App;

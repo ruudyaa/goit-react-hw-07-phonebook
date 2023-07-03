@@ -1,34 +1,70 @@
+import { useEffect, Fragment } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { IoPersonRemove } from 'react-icons/io5';
-import { Btn, Item, List } from './ContactList.styled';
+// toastify
+import { toast } from 'react-toastify';
+import { toastifyOptions } from 'utils/toastifyOptions';
 
 // redux
-import { deleteContact } from 'redux/contactsSlice';
-import { getFilteredContacts } from 'redux/selectors';
+import { fetchContacts } from 'redux/contacts/contacts-operations';
+import {
+  selectContacts,
+  selectIsLoading,
+  selectError,
+  selectFilteredContacts,
+  selectFilter,
+} from 'redux/selectors';
+
+// style
+import { Info, List } from './ContactList.styled';
+import { ContactItem } from 'components/ContactItem/ContactItem';
 
 export const ContactList = () => {
-  const filteredContacts = useSelector(getFilteredContacts);
+  const contacts = useSelector(selectContacts);
+  const isLoading = useSelector(selectIsLoading);
+  const error = useSelector(selectError);
+  const filter = useSelector(selectFilter);
 
   const dispatch = useDispatch();
 
-  const onDeleteContact = contactId => {
-    dispatch(deleteContact(contactId));
+  useEffect(() => {
+    dispatch(fetchContacts());
+  }, [dispatch]);
+
+  const result = useSelector(selectFilteredContacts);
+
+  const getFilteredContacts = data => {
+    if (filter.toLowerCase() && !data.length) {
+      toast.warn(`No contacts matching your request`, toastifyOptions);
+    }
+    return data;
   };
 
+  const filteredContacts = getFilteredContacts(result);
+
   return (
-    <List>
-      {filteredContacts.map(({ name, number, id }) => {
-        return (
-          <Item key={id}>
-            <span>{name}:</span>
-            <span>{number}</span>
-            <Btn type="button" onClick={() => onDeleteContact(id)}>
-              <IoPersonRemove size="14" />
-            </Btn>
-          </Item>
-        );
-      })}
-    </List>
+    <>
+      {isLoading && contacts?.length === 0}
+      {error && !isLoading && <div>Ooops, error...</div>}
+      {!filteredContacts?.length && !error && !isLoading && (
+        <Info>Contacts not found</Info>
+      )}
+      {!error && !isLoading && filteredContacts?.length > 0 && (
+        <List>
+          {filteredContacts?.map(({ avatar, name, phone, id }) => {
+            return (
+              <Fragment key={id}>
+                <ContactItem
+                  avatar={avatar}
+                  name={name}
+                  phone={phone}
+                  id={id}
+                />
+              </Fragment>
+            );
+          })}
+        </List>
+      )}
+    </>
   );
 };
